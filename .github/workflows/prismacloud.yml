@@ -5,7 +5,6 @@ name: Checkov Github action
 on:
   workflow_dispatch:
   push:
-    branches: [main]
   pull_request:
     branches: [main]
 
@@ -15,16 +14,24 @@ jobs:
     runs-on: ubuntu-latest
     name: Prisma Cloud
     env:
-      PRISMA_API_URL: https://api0.prismacloud.io/
+      PRISMA_API_URL: https://api.eu.prismacloud.io/
     steps:
       - name: Checkout repo
         uses: actions/checkout@master
+
       - name: Run Prisma Cloud action
         id: Checkov
         uses: bridgecrewio/checkov-action@master
+        env:
+          PRISMA_API_URL: ${{ secrets.PRISMA_API_URL }}
         with:
           directory: '.'
-          api-key: ${{ secrets.BC_API_KEY }}
+          api-key: ${{ secrets.PRISMA_ACCESS_KEY }}::${{ secrets.PRISMA_SECRET_KEY }}
+          output_format: cli
+          soft_fail: true
+          quiet: true
+          framework: sca_package
+
       - name: Expose report
         uses: actions/upload-artifact@v3
         with:
